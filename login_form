@@ -1,1 +1,69 @@
+<?php
+@include 'coonectdb.php';
+
+session_start();
+
+if(isset($_POST['submit'])){
+   // Retrieve user inputs and sanitize them
+   $username = isset($_POST['username']) ? mysqli_real_escape_string($conn, $_POST['username']) : '';
+   $password = isset($_POST['password']) ? mysqli_real_escape_string($conn, $_POST['password']) : '';
+
+   // Query the database to check if the user exists
+   $select = "SELECT * FROM user WHERE USERNAME = '$username'";
+   $result = mysqli_query($conn, $select);
+
+   // Check if the query executed successfully
+   if($result) {
+      // Check if the user exists
+      if(mysqli_num_rows($result) > 0){
+         $row = mysqli_fetch_assoc($result);
+         // Verify the password
+         if($password === $row['PASSWORD']) {
+            $_SESSION['username'] = $row['USERNAME'];
+            header('location: welcome.php');
+            exit;
+         } else {
+            $error = 'Incorrect password. Please try again.';
+         }
+      } else {
+         $error = 'User not found. Please check your credentials.';
+      }
+   } else {
+      // Handle query execution error
+      $error = 'Database error. Please try again later.';
+   }
+}
+?>
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Login form</title>
+
+   <!-- Custom CSS file link -->
+   <link rel="stylesheet" href="style.css">
+</head>
+<body>
+   
+<div class="form-container">
+   <form action="" method="post">
+      <h3>Login now</h3>
+      <?php if(isset($error)): ?>
+         <span class="error-msg"><?php echo $error; ?></span>
+      <?php endif; ?>
+      <input type="text" name="username" required placeholder="Enter your username">
+      <input type="password" name="password" required placeholder="Enter your password">
+      <input type="submit" name="submit" value="Login" class="form-btn">
+      <p>Don't have an account? <a href="register_form.php">Register now</a></p>
+   </form>
+</div>
+
+</body>
+</html>
 
